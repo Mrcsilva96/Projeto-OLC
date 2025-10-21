@@ -1,227 +1,227 @@
 // ==========================================================================
-// 1. INICIALIZAÇÃO DE DADOS (SEED)
-// - Garante que a aplicação tenha dados iniciais quando aberta pela primeira vez.
+// 1. DADOS INICIAIS (SEED)
 // ==========================================================================
-
-// Define os dados padrão para veículos e usuários.
 const carrosIniciais = [
-    {
-        id: Date.now() + 1, // Usando timestamp para garantir um ID único
-        nomeCliente: "Bruno Silva",
-        cpf: "123.456.789-00",
-        telefone: "(11) 98765-4321",
-        endereco: "Rua das Flores, 123",
-        email: "bruno.silva@example.com",
-        comprador: "Bruno Silva",
-        modelo: "Corolla",
-        placa: "ABC-1234",
-        valor: "110000.00",
-        cor: "Prata",
-        ano: "2022",
-        condicaoPagamento: ["financiamento"]
-    },
-    {
-        id: Date.now() + 2,
-        nomeCliente: "Maria Oliveira",
-        cpf: "987.654.321-00",
-        telefone: "(21) 91234-5678",
-        endereco: "Avenida Principal, 456",
-        email: "maria.oliveira@example.com",
-        comprador: "Empresa X",
-        modelo: "Onix",
-        placa: "DEF-5678",
-        valor: "78000.00",
-        cor: "Branco",
-        ano: "2023",
-        condicaoPagamento: ["pix", "cartao"]
-    }
+  {
+    id: Date.now() + 1,
+    nomeCliente: "Bruno Silva",
+    cpf: "123.456.789-00",
+    telefone: "(11) 98765-4321",
+    endereco: "Rua das Flores, 123",
+    email: "bruno.silva@example.com",
+    comprador: "Bruno Silva",
+    modelo: "Corolla",
+    placa: "ABC-1234",
+    valor: "110000.00",
+    cor: "Prata",
+    ano: "2022",
+    condicaoPagamento: ["financiamento"]
+  },
+  {
+    id: Date.now() + 2,
+    nomeCliente: "Maria Oliveira",
+    cpf: "987.654.321-00",
+    telefone: "(21) 91234-5678",
+    endereco: "Avenida Principal, 456",
+    email: "maria.oliveira@example.com",
+    comprador: "Empresa X",
+    modelo: "Onix",
+    placa: "DEF-5678",
+    valor: "78000.00",
+    cor: "Branco",
+    ano: "2023",
+    condicaoPagamento: ["pix", "cartao"]
+  }
 ];
 
 const usuariosIniciais = [
-    {
-        nome: "Professor Avaliador",
-        email: "professor@uninter.com",
-        senha: "123" // Senha simples para fins acadêmicos
-    }
+  { nome: "Professor Avaliador", email: "professor@uninter.com", senha: "123" }
 ];
 
-// Função que popula o localStorage se ele estiver vazio.
-function inicializarDados() {
-    if (!localStorage.getItem('veiculos')) {
-        localStorage.setItem('veiculos', JSON.stringify(carrosIniciais));
-    }
-    if (!localStorage.getItem('usuarios')) {
-        localStorage.setItem('usuarios', JSON.stringify(usuariosIniciais));
-    }
+// ==========================================================================
+// 2. FUNÇÕES AUXILIARES
+// ==========================================================================
+function getDados(chave) {
+  return JSON.parse(localStorage.getItem(chave)) || [];
 }
 
+function setDados(chave, dados) {
+  localStorage.setItem(chave, JSON.stringify(dados));
+}
+
+function inicializarDados() {
+  if (!localStorage.getItem("veiculos")) setDados("veiculos", carrosIniciais);
+  if (!localStorage.getItem("usuarios")) setDados("usuarios", usuariosIniciais);
+}
 
 // ==========================================================================
-// 2. FUNÇÕES DE LÓGICA E MANIPULAÇÃO DO DOM
-// - Funções que controlam o comportamento de cada página.
+// 3. LÓGICA DAS PÁGINAS
 // ==========================================================================
+document.addEventListener("DOMContentLoaded", () => {
+  inicializarDados();
 
-// Roda o código específico da página assim que o HTML for carregado.
-document.addEventListener('DOMContentLoaded', () => {
-    
-    // Antes de tudo, garante que os dados iniciais existam.
-    inicializarDados();
+  const paginaLogin = document.getElementById("login-form");
+  const paginaCadastroUsuario = document.getElementById("cadastro-usuario-form");
+  const paginaCadastroVeiculo = document.getElementById("cadastro-veiculo-form");
+  const tabelaVeiculos = document.getElementById("tabela-veiculos-corpo");
 
-    // --- LÓGICA DA PÁGINA DE LOGIN ---
-    if (document.getElementById('login-form')) {
-        const loginForm = document.getElementById('login-form');
-        loginForm.addEventListener('submit', (event) => {
-            event.preventDefault(); // Impede o recarregamento da página
+  // ================= LOGIN =================
+  if (paginaLogin) {
+    paginaLogin.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const email = document.getElementById("email").value;
+      const senha = document.getElementById("password").value;
 
-            const email = document.getElementById('email').value;
-            const senha = document.getElementById('password').value;
+      const usuarios = getDados("usuarios");
+      const usuario = usuarios.find(u => u.email === email && u.senha === senha);
 
-            const usuarios = JSON.parse(localStorage.getItem('usuarios'));
+      if (usuario) {
+        alert("Login realizado com sucesso!");
+        sessionStorage.setItem("usuarioLogado", "true");
+        window.location.href = "listagemVeiculos.html";
+      } else {
+        alert("Email ou senha inválidos.");
+      }
+    });
+  }
 
-            const usuarioEncontrado = usuarios.find(user => user.email === email && user.senha === senha);
+  // ================= CADASTRO DE USUÁRIO =================
+  if (paginaCadastroUsuario) {
+    paginaCadastroUsuario.addEventListener("submit", (e) => {
+      e.preventDefault();
 
-            if (usuarioEncontrado) {
-                alert('Login realizado com sucesso!');
-                // Salva um indicador de que o usuário está logado
-                sessionStorage.setItem('usuarioLogado', 'true');
-                // Redireciona para a página de listagem
-                window.location.href = 'listagemVeiculos.html';
-            } else {
-                alert('Email ou senha inválidos.');
-            }
-        });
+      const nome = document.getElementById("nome").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const senha = document.getElementById("senha").value;
+      const confirmarSenha = document.getElementById("confirmar-senha").value;
+
+      if (senha !== confirmarSenha) return alert("As senhas não coincidem!");
+
+      const usuarios = getDados("usuarios");
+      if (usuarios.some(u => u.email === email))
+        return alert("Este e-mail já está em uso!");
+
+      usuarios.push({ nome, email, senha });
+      setDados("usuarios", usuarios);
+
+      alert("Usuário cadastrado com sucesso!");
+      window.location.href = "index.html";
+    });
+  }
+
+  // ================= CADASTRO DE VEÍCULO =================
+  if (paginaCadastroVeiculo) {
+    paginaCadastroVeiculo.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const condicoes = [...document.querySelectorAll('input[name="condicao-pagamento"]:checked')].map(c => c.value);
+
+      const novoVeiculo = {
+        id: Date.now(),
+        nomeCliente: document.getElementById("nome").value,
+        cpf: document.getElementById("cpf").value,
+        telefone: document.getElementById("telefone").value,
+        endereco: document.getElementById("endereco").value,
+        email: document.getElementById("email").value,
+        comprador: document.getElementById("comprador").value,
+        modelo: document.getElementById("modelo").value,
+        placa: document.getElementById("placa").value,
+        valor: document.getElementById("valor").value,
+        cor: document.getElementById("cor").value,
+        ano: document.getElementById("ano").value,
+        condicaoPagamento: condicoes
+      };
+
+      const veiculos = getDados("veiculos");
+      veiculos.push(novoVeiculo);
+      setDados("veiculos", veiculos);
+
+      alert("Veículo cadastrado com sucesso!");
+      e.target.reset();
+    });
+  }
+
+  // ================= LISTAGEM DE VEÍCULOS =================
+  if (tabelaVeiculos) {
+    // 🔒 Verificação de login (nova funcionalidade)
+    const usuarioLogado = sessionStorage.getItem("usuarioLogado");
+    if (!usuarioLogado) {
+      alert("Você precisa estar logado para acessar esta página.");
+      window.location.href = "index.html";
+      return;
     }
 
-    // --- LÓGICA DA PÁGINA DE CADASTRO DE USUÁRIO ---
-    if (document.getElementById('cadastro-usuario-form')) {
-        const form = document.getElementById('cadastro-usuario-form');
-        form.addEventListener('submit', (event) => {
-            event.preventDefault();
+    const campoBusca = document.getElementById("campo-busca");
 
-            const nome = document.getElementById('nome').value;
-            const email = document.getElementById('email').value;
-            const senha = document.getElementById('senha').value;
-            const confirmarSenha = document.getElementById('confirmar-senha').value;
+    function renderizarVeiculos(filtro = "") {
+      const veiculos = getDados("veiculos");
+      tabelaVeiculos.innerHTML = "";
 
-            if (senha !== confirmarSenha) {
-                alert('As senhas não coincidem!');
-                return;
-            }
+      const filtrados = veiculos.filter(v =>
+        [v.placa, v.modelo, v.nomeCliente].some(campo =>
+          campo.toLowerCase().includes(filtro.toLowerCase())
+        )
+      );
 
-            const usuarios = JSON.parse(localStorage.getItem('usuarios'));
-            
-            // Verifica se o e-mail já existe
-            const emailExistente = usuarios.some(user => user.email === email);
-            if (emailExistente) {
-                alert('Este e-mail já está em uso!');
-                return;
-            }
+      if (filtrados.length === 0) {
+        tabelaVeiculos.innerHTML = <tr><td colspan="7">Nenhum veículo encontrado.</td></tr>;
+        return;
+      }
 
-            // Adiciona o novo usuário
-            const novoUsuario = { nome, email, senha };
-            usuarios.push(novoUsuario);
-            localStorage.setItem('usuarios', JSON.stringify(usuarios));
-
-            alert('Usuário cadastrado com sucesso!');
-            window.location.href = 'index.html';
-        });
+      filtrados.forEach(v => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${v.placa}</td>
+          <td>${v.modelo}</td>
+          <td>${v.nomeCliente}</td>
+          <td>R$ ${parseFloat(v.valor).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</td>
+          <td>${v.ano}</td>
+          <td>${v.cor}</td>
+          <td>
+            <button class="btn-editar" data-id="${v.id}">Editar</button>
+            <button class="btn-excluir" data-id="${v.id}">Excluir</button>
+          </td>
+        `;
+        tabelaVeiculos.appendChild(tr);
+      });
     }
 
-    // --- LÓGICA DA PÁGINA DE CADASTRO DE VEÍCULO ---
-    if (document.getElementById('cadastro-veiculo-form')) {
-        const form = document.getElementById('cadastro-veiculo-form');
-        form.addEventListener('submit', (event) => {
-            event.preventDefault();
+    // Busca dinâmica
+    campoBusca.addEventListener("input", () => renderizarVeiculos(campoBusca.value));
 
-            const condicoesPagamento = [];
-            document.querySelectorAll('input[name="condicao-pagamento"]:checked').forEach((checkbox) => {
-                condicoesPagamento.push(checkbox.value);
-            });
+    // Eventos dos botões
+    tabelaVeiculos.addEventListener("click", (e) => {
+      const id = e.target.dataset.id;
+      const veiculos = getDados("veiculos");
 
-            const novoVeiculo = {
-                id: Date.now(), // ID único
-                nomeCliente: document.getElementById('nome').value,
-                cpf: document.getElementById('cpf').value,
-                telefone: document.getElementById('telefone').value,
-                endereco: document.getElementById('endereco').value,
-                email: document.getElementById('email').value,
-                comprador: document.getElementById('comprador').value,
-                modelo: document.getElementById('modelo').value,
-                placa: document.getElementById('placa').value,
-                valor: document.getElementById('valor').value,
-                cor: document.getElementById('cor').value,
-                ano: document.getElementById('ano').value,
-                condicaoPagamento: condicoesPagamento
-            };
+      if (e.target.classList.contains("btn-excluir")) {
+        if (confirm("Deseja realmente excluir este veículo?")) {
+          const novos = veiculos.filter(v => v.id != id);
+          setDados("veiculos", novos);
+          renderizarVeiculos();
+        }
+      }
 
-            const veiculos = JSON.parse(localStorage.getItem('veiculos'));
-            veiculos.push(novoVeiculo);
-            localStorage.setItem('veiculos', JSON.stringify(veiculos));
+      if (e.target.classList.contains("btn-editar")) {
+        const veiculo = veiculos.find(v => v.id == id);
+        abrirPopup(veiculo.modelo, veiculo.comprador, veiculo.cor, veiculo.ano, veiculo.valor, veiculo.comprador, veiculo.condicaoPagamento.join(", "));
+      }
+    });
 
-            alert('Veículo cadastrado com sucesso!');
-            form.reset(); // Limpa o formulário
-        });
-    }
-
-    // --- LÓGICA DA PÁGINA DE LISTAGEM DE VEÍCULOS ---
-    if (document.getElementById('tabela-veiculos-corpo')) {
-        const corpoTabela = document.getElementById('tabela-veiculos-corpo');
-        const campoBusca = document.getElementById('campo-busca');
-
-        // Função para renderizar os veículos na tabela
-        const renderizarVeiculos = (filtro = '') => {
-            const veiculos = JSON.parse(localStorage.getItem('veiculos'));
-            corpoTabela.innerHTML = ''; // Limpa a tabela antes de preencher
-
-            const veiculosFiltrados = veiculos.filter(veiculo => 
-                veiculo.placa.toLowerCase().includes(filtro.toLowerCase()) ||
-                veiculo.modelo.toLowerCase().includes(filtro.toLowerCase()) ||
-                veiculo.nomeCliente.toLowerCase().includes(filtro.toLowerCase())
-            );
-
-            if (veiculosFiltrados.length === 0) {
-                corpoTabela.innerHTML = '<tr><td colspan="7">Nenhum veículo encontrado.</td></tr>';
-                return;
-            }
-
-            veiculosFiltrados.forEach(veiculo => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${veiculo.placa}</td>
-                    <td>${veiculo.modelo}</td>
-                    <td>${veiculo.nomeCliente}</td>
-                    <td>${veiculo.valor}</td>
-                    <td>${veiculo.ano}</td>
-                    <td>${veiculo.cor}</td>
-                    <td>
-                        <button>Editar</button>
-                        <button>Excluir</button>
-                    </td>
-                `;
-                corpoTabela.appendChild(tr);
-            });
-        };
-        
-        // Adiciona um "escutador" para o campo de busca
-        campoBusca.addEventListener('input', () => {
-            renderizarVeiculos(campoBusca.value);
-        });
-
-        // Renderiza a lista completa ao carregar a página
-        renderizarVeiculos();
-    }
+    renderizarVeiculos();
+  }
 });
 
-function abrirPopup(modelo, marca, cor, ano, valor, comprador, condicao, imagem) {
+// ==========================================================================
+// 4. POPUP DE DETALHES
+// ==========================================================================
+function abrirPopup(modelo, comprador, cor, ano, valor, comprador2, condicao) {
   document.getElementById("popup-modelo").textContent = modelo;
-  document.getElementById("popup-marca").textContent = marca;
   document.getElementById("popup-cor").textContent = cor;
   document.getElementById("popup-ano").textContent = ano;
   document.getElementById("popup-valor").textContent = valor;
-  document.getElementById("popup-comprador").textContent = comprador;
+  document.getElementById("popup-comprador").textContent = comprador2;
   document.getElementById("popup-condicao").textContent = condicao;
- 
-
   document.getElementById("popup-veiculo").style.display = "flex";
 }
 
